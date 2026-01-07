@@ -1,0 +1,535 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyWrite AI - Grammar Enhancement Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0d2e 0%, #1a1f4d 50%, #2d1b69 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: 900;
+            font-style: italic;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            color: #818cf8;
+            opacity: 0.6;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 40px;
+        }
+
+        .panel-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #64748b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .char-count {
+            font-size: 10px;
+            background: rgba(79, 70, 229, 0.2);
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            margin-left: auto;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 400px;
+            padding: 30px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.6);
+            color: #f1f5f9;
+            font-size: 18px;
+            line-height: 1.8;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: rgba(79, 70, 229, 0.5);
+        }
+
+        .controls-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 40px;
+        }
+
+        .tone-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .tone-btn {
+            padding: 20px;
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: capitalize;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tone-btn:hover {
+            border-color: rgba(79, 70, 229, 0.3);
+            color: #818cf8;
+        }
+
+        .tone-btn.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #6366f1;
+            transform: scale(1.05);
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #334155;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4f46e5;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .enhance-btn {
+            width: 100%;
+            padding: 30px;
+            border-radius: 30px;
+            border: none;
+            background: #4f46e5;
+            color: white;
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.4);
+        }
+
+        .enhance-btn:hover:not(:disabled) {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -10px rgba(79, 70, 229, 0.6);
+        }
+
+        .enhance-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-section {
+            margin-top: 40px;
+        }
+
+        .result-box {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(79, 70, 229, 0.3);
+            border-radius: 40px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(79, 70, 229, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px 40px 0 0;
+            margin: -40px -40px 30px -40px;
+        }
+
+        .result-text {
+            font-size: 24px;
+            line-height: 1.6;
+            color: #f1f5f9;
+        }
+
+        .copy-btn {
+            padding: 15px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #4f46e5;
+        }
+
+        .improvements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .improvement-card {
+            background: rgba(15, 23, 42, 0.8);
+            border-left: 6px solid rgba(79, 70, 229, 0.5);
+            border-radius: 30px;
+            padding: 30px;
+            transition: all 0.3s;
+        }
+
+        .improvement-card:hover {
+            border-left-color: #4f46e5;
+            transform: translateX(5px);
+        }
+
+        .improvement-reason {
+            font-size: 16px;
+            font-weight: 800;
+            color: #818cf8;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .improvement-before {
+            padding: 15px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 15px;
+            color: rgba(239, 68, 68, 0.8);
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .improvement-after {
+            padding: 20px;
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            border-radius: 20px;
+            color: #c4b5fd;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #4f46e5;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            padding: 30px;
+            border-radius: 25px;
+            color: #fca5a5;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">SKYWRITE AI</div>
+            <div class="tagline">Precision Intelligence Engine</div>
+        </header>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-label">
+                    Source Manuscript
+                    <span class="char-count" id="charCount">0 CHAR</span>
+                </div>
+                <textarea id="inputText" placeholder="Insert your text here. Let the engine perfect every word..."></textarea>
+            </div>
+
+            <div class="controls-panel">
+                <div class="panel-label">Refinement Profiles</div>
+                <div class="tone-grid">
+                    <button class="tone-btn active" data-tone="original">Original</button>
+                    <button class="tone-btn" data-tone="professional">Professional</button>
+                    <button class="tone-btn" data-tone="casual">Casual</button>
+                    <button class="tone-btn" data-tone="academic">Academic</button>
+                </div>
+
+                <div class="toggle-switch">
+                    <div>
+                        <div style="font-weight: 800; margin-bottom: 5px;">Trace Logic</div>
+                        <div style="font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 2px;">Expose AI reasoning map</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="showExplanations" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <button class="enhance-btn" id="enhanceBtn">
+                    ✨ Execute Refinement
+                </button>
+            </div>
+        </div>
+
+        <div id="resultSection" class="result-section hidden">
+            <div id="loadingDiv" class="loading hidden">
+                <div class="spinner"></div>
+                <h3 style="font-size: 32px; font-weight: 900; font-style: italic;">SYNTHESIZING...</h3>
+                <p style="color: #818cf8; font-size: 12px; margin-top: 20px; text-transform: uppercase; letter-spacing: 5px;">Calibrating Syntax & Flow</p>
+            </div>
+
+            <div id="errorDiv" class="error hidden"></div>
+
+            <div id="resultDiv" class="hidden">
+                <div class="result-box">
+                    <div class="result-header">
+                        <span style="font-weight: 900; text-transform: uppercase; letter-spacing: 3px;">✓ Final Rendition</span>
+                        <button class="copy-btn" id="copyBtn">📋 Copy</button>
+                    </div>
+                    <div class="result-text" id="resultText"></div>
+                </div>
+
+                <div id="improvementsSection" class="hidden">
+                    <div class="panel-label" style="margin-bottom: 30px; font-size: 32px; font-weight: 900;">
+                        🧠 Neural Insight Log
+                    </div>
+                    <div class="improvements-grid" id="improvementsGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('inputText');
+        const charCount = document.getElementById('charCount');
+        const toneBtns = document.querySelectorAll('.tone-btn');
+        const showExplanations = document.getElementById('showExplanations');
+        const enhanceBtn = document.getElementById('enhanceBtn');
+        const resultSection = document.getElementById('resultSection');
+        const loadingDiv = document.getElementById('loadingDiv');
+        const errorDiv = document.getElementById('errorDiv');
+        const resultDiv = document.getElementById('resultDiv');
+        const resultText = document.getElementById('resultText');
+        const copyBtn = document.getElementById('copyBtn');
+        const improvementsSection = document.getElementById('improvementsSection');
+        const improvementsGrid = document.getElementById('improvementsGrid');
+
+        let selectedTone = 'original';
+
+        // Character count
+        inputText.addEventListener('input', () => {
+            charCount.textContent = `${inputText.value.length} CHAR`;
+        });
+
+        // Tone selection
+        toneBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                toneBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedTone = btn.dataset.tone;
+            });
+        });
+
+        // Enhance button
+        enhanceBtn.addEventListener('click', async () => {
+            const text = inputText.value.trim();
+            if (!text) {
+                alert('Please enter some text to enhance!');
+                return;
+            }
+
+            // Show loading
+            resultSection.classList.remove('hidden');
+            loadingDiv.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+            resultDiv.classList.add('hidden');
+            enhanceBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/enhance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        tone: selectedTone,
+                        showExplanations: showExplanations.checked
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Enhancement failed');
+                }
+
+                // Show results
+                loadingDiv.classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+                resultText.textContent = data.correctedText;
+
+                // Show improvements if available
+                if (data.improvements && data.improvements.length > 0) {
+                    improvementsSection.classList.remove('hidden');
+                    improvementsGrid.innerHTML = data.improvements.map(imp => `
+                        <div class="improvement-card">
+                            <div class="improvement-reason">${imp.reason}</div>
+                            <div class="improvement-before">"${imp.original}"</div>
+                            <div class="improvement-after">"${imp.fixed}"</div>
+                        </div>
+                    `).join('');
+                } else {
+                    improvementsSection.classList.add('hidden');
+                }
+
+            } catch (error) {
+                loadingDiv.classList.add('hidden');
+                errorDiv.classList.remove('hidden');
+                errorDiv.textContent = `❌ Error: ${error.message}`;
+            } finally {
+                enhanceBtn.disabled = false;
+            }
+        });
+
+        // Copy button
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(resultText.textContent);
+            copyBtn.textContent = '✓ Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = '📋 Copy';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
